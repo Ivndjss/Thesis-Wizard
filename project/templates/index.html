@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mean Calculator - Survey Analysis</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { margin-top: 50px; }
+        .card { margin-bottom: 20px; }
+        .respondent-header { font-weight: bold; color: #007bff; }
+        .btn-custom { background-color: #007bff; color: white; }
+    </style>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <h1 class="card-title text-center">Mean Calculator - Survey Analysis</h1>
+            
+            <!-- Form to submit the responses -->
+            <form action="{{ url_for('submit') }}" method="POST">
+                <!-- Hidden input to store number of respondents -->
+                <input type="hidden" name="num_respondents" id="num_respondents" value="0">
+                
+                <!-- Button to trigger modal for setting respondent count -->
+                <button type="button" class="btn btn-custom mb-3" data-toggle="modal" data-target="#setRespondentCountModal">Set Respondent Count</button>
+
+                <!-- Respondent Container -->
+                <div id="respondent-container">
+                    <!-- Placeholder for dynamically added respondent forms -->
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary btn-block">Submit Responses</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for setting the number of respondents -->
+<div class="modal fade" id="setRespondentCountModal" tabindex="-1" role="dialog" aria-labelledby="setRespondentCountModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="setRespondentCountModalLabel">Set Number of Respondents</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Enter the number of respondents:</p>
+                <input type="number" id="desired_respondents" class="form-control" min="1" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="setRespondentCount()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- JavaScript for Dynamic Respondent Addition -->
+<script>
+    function setRespondentCount() {
+        const count = parseInt(document.getElementById('desired_respondents').value);
+
+        if (!isNaN(count) && count > 0) {
+            document.getElementById('num_respondents').value = count; // Update hidden input
+            generateRespondentForms(count);
+            $('#setRespondentCountModal').modal('hide'); // Hide modal after setting count
+        } else {
+            alert('Please enter a valid number of respondents.');
+        }
+    }
+
+    function generateRespondentForms(count) {
+        const container = document.getElementById('respondent-container');
+        container.innerHTML = ''; // Clear existing forms
+
+        for (let i = 0; i < count; i++) {
+            const respondentDiv = document.createElement('div');
+            respondentDiv.className = 'respondent card p-3 mb-3';
+            respondentDiv.id = `respondent-${i}`;
+            respondentDiv.innerHTML = `
+                <div class="respondent-header">Respondent ${i + 1}</div>
+                {% for question in questions %}
+                    <div class="form-group">
+                        <label>${{ question }}:</label>
+                        <input type="number" name="respondent${i}_question{{ loop.index0 }}" class="form-control" min="1" max="4" required>
+                    </div>
+                {% endfor %}
+            `;
+            container.appendChild(respondentDiv);
+        }
+    }
+</script>
+
+</body>
+</html>
